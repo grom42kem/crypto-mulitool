@@ -1,5 +1,5 @@
 import { BIP32Factory } from "bip32";
-import * as ecc from "tiny-secp256k1";
+import * as ecc from "@bitcoinerlab/secp256k1";
 import { Buffer } from "buffer";
 
 // Match browser-ish globals provided by our esbuild inject shim

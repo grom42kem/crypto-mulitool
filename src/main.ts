@@ -1,6 +1,6 @@
 import * as bip39 from "bip39";
 import { BIP32Factory, type BIP32Interface } from "bip32";
-import * as ecc from "tiny-secp256k1";
+import * as ecc from "@bitcoinerlab/secp256k1";
 import * as bitcoin from "bitcoinjs-lib";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils";
@@ -8,11 +8,6 @@ import { ethers } from "ethers";
 import * as rippleKeypairs from "ripple-keypairs";
 
 const bip32 = BIP32Factory(ecc);
-
-function isValidPriv32(priv32: Uint8Array): boolean {
-  // tiny-secp256k1@1.x expects Buffers for scalar checks
-  return ecc.isPrivate(Buffer.from(priv32));
-}
 
 type Coin = "BTC" | "ETH" | "LTC" | "DOGE" | "XRP";
 type Mode = "mnemonic" | "brain";
@@ -258,7 +253,7 @@ function deriveFromBrain(): { masterPriv32: Uint8Array; jsonBrain: ExportJson["b
   // Приведение к валидному приватному ключу: если 0 или >=n, домешиваем.
   let priv = digest;
   let counter = 0;
-  while (!isValidPriv32(priv)) {
+  while (!ecc.isPrivate(priv)) {
     counter++;
     priv = sha256(new Uint8Array([...priv, counter & 0xff]));
     if (counter > 50) throw new Error("Failed to derive a valid private key from the input string.");
@@ -333,7 +328,7 @@ function compute(): { rows: Row[]; json: ExportJson } {
         ]);
         let priv = sha256(material);
         let tries = 0;
-        while (!isValidPriv32(priv)) {
+        while (!ecc.isPrivate(priv)) {
           tries++;
           priv = sha256(new Uint8Array([...priv, tries & 0xff]));
           if (tries > 50) throw new Error("Brain Wallet: failed to derive a valid private key.");
