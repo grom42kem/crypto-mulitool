@@ -2,12 +2,14 @@ import * as bip39 from "bip39";
 import { BIP32Factory, type BIP32Interface } from "bip32";
 import * as ecc from "@bitcoinerlab/secp256k1";
 import * as bitcoin from "bitcoinjs-lib";
+import { ECPairFactory, type ECPairAPI } from "ecpair";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils";
 import { ethers } from "ethers";
 import * as rippleKeypairs from "ripple-keypairs";
 
 const bip32 = BIP32Factory(ecc);
+const ECPair: ECPairAPI = ECPairFactory(ecc);
 
 type Coin = "BTC" | "ETH" | "LTC" | "DOGE" | "XRP";
 type Mode = "mnemonic" | "brain";
@@ -105,8 +107,8 @@ function btcLikeRowFromPriv(
 
   const privBuf = Buffer.from(privKey32);
 
-  const pairC = bitcoin.ECPair.fromPrivateKey(privBuf, { compressed: true, network });
-  const pairU = bitcoin.ECPair.fromPrivateKey(privBuf, { compressed: false, network });
+  const pairC = ECPair.fromPrivateKey(privBuf, { compressed: true, network });
+  const pairU = ECPair.fromPrivateKey(privBuf, { compressed: false, network });
 
   const addrC = bitcoin.payments.p2pkh({ pubkey: pairC.publicKey, network }).address ?? "";
   const addrU = bitcoin.payments.p2pkh({ pubkey: pairU.publicKey, network }).address ?? "";
