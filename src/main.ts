@@ -137,12 +137,13 @@ function btcLikeRowFromPriv(
 
 function ethRowFromPriv(index: number, path: string, privKey32: Uint8Array, showPriv: boolean): Row {
   const w = new ethers.Wallet(bytesToHex(privKey32));
+  const pubHex = w.signingKey.publicKey;
   return {
     coin: "ETH",
     index,
     path,
     address: w.address,
-    pubkeyHex: w.publicKey.replace(/^0x/, ""),
+    pubkeyHex: pubHex.replace(/^0x/, ""),
     privateOut: showPriv ? w.privateKey : undefined
   };
 }
