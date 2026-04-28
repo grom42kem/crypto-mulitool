@@ -356,8 +356,31 @@ function compute(): { rows: Row[]; json: ExportJson } {
   return { rows, json };
 }
 
-async function copyText(s: string) {
-  await navigator.clipboard.writeText(s);
+async function copyTextToClipboard(text: string) {
+  // Prefer Async Clipboard API, but it can fail on some browsers / insecure contexts.
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // fall through
+    }
+  }
+
+  // Fallback: execCommand copy from a temporary textarea.
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.setAttribute("readonly", "true");
+  ta.style.position = "fixed";
+  ta.style.left = "-9999px";
+  ta.style.top = "0";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+
+  const ok = document.execCommand("copy");
+  document.body.removeChild(ta);
+  if (!ok) throw new Error("Copy failed (clipboard API unavailable).");
 }
 
 function rowsToTsv(rows: Row[], includePriv: boolean): string {
@@ -451,16 +474,28 @@ function setupButtons() {
     setStatus("info", "Cleared");
   });
 
-  $("btnCopyJson").addEventListener("click", async () => {
-    if (!lastJson) return setStatus("err", "Nothing to copy (JSON is empty).");
-    await copyText(JSON.stringify(lastJson, null, 2));
-    setStatus("ok", "JSON copied to clipboard");
+  $("btnCopyJson").addEventListener("click", () => {
+    void (async () => {
+      try {
+        if (!lastJson) return setStatus("err", "Nothing to copy (JSON is empty).");
+        await copyTextToClipboard(JSON.stringify(lastJson, null, 2));
+        setStatus("ok", "JSON copied to clipboard");
+      } catch (e: any) {
+        setStatus("err", e?.message ? String(e.message) : "Copy failed");
+      }
+    })();
   });
 
-  $("btnCopyTable").addEventListener("click", async () => {
-    if (!lastRows.length) return setStatus("err", "Nothing to copy (table is empty).");
-    await copyText(rowsToTsv(lastRows, showPrivEnabled()));
-    setStatus("ok", "Table (TSV) copied to clipboard");
+  $("btnCopyTable").addEventListener("click", () => {
+    void (async () => {
+      try {
+        if (!lastRows.length) return setStatus("err", "Nothing to copy (table is empty).");
+        await copyTextToClipboard(rowsToTsv(lastRows, showPrivEnabled()));
+        setStatus("ok", "Table (TSV) copied to clipboard");
+      } catch (e: any) {
+        setStatus("err", e?.message ? String(e.message) : "Copy failed");
+      }
+    })();
   });
 }
 
