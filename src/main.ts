@@ -110,8 +110,10 @@ function btcLikeRowFromPriv(
   const pairC = ECPair.fromPrivateKey(privBuf, { compressed: true, network });
   const pairU = ECPair.fromPrivateKey(privBuf, { compressed: false, network });
 
-  const addrC = bitcoin.payments.p2pkh({ pubkey: pairC.publicKey, network }).address ?? "";
-  const addrU = bitcoin.payments.p2pkh({ pubkey: pairU.publicKey, network }).address ?? "";
+  const addrC =
+    bitcoin.payments.p2pkh({ pubkey: Buffer.from(pairC.publicKey), network }).address ?? "";
+  const addrU =
+    bitcoin.payments.p2pkh({ pubkey: Buffer.from(pairU.publicKey), network }).address ?? "";
 
   const rows: Row[] = [];
   rows.push({
