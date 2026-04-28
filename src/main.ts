@@ -14,6 +14,8 @@ const ECPair: ECPairAPI = ECPairFactory(ecc);
 type Coin = "BTC" | "ETH" | "LTC" | "DOGE" | "XRP";
 type Mode = "mnemonic" | "brain";
 
+const DISPLAY_COIN_ORDER: Coin[] = ["BTC", "ETH", "LTC", "DOGE", "XRP"];
+
 type Row = {
   coin: Coin;
   index: number;
@@ -40,6 +42,47 @@ type ExportJson = {
   };
   rows: Row[];
 };
+
+type DisplayLine = { kind: "group"; coin: Coin } | { kind: "row"; row: Row };
+
+function coinRank(coin: Coin): number {
+  const idx = DISPLAY_COIN_ORDER.indexOf(coin);
+  return idx === -1 ? 999 : idx;
+}
+
+function addrKindRank(address: string): number {
+  if (address.includes("(compressed)")) return 0;
+  if (address.includes("(uncompressed)")) return 1;
+  return 0;
+}
+
+function sortRowsForDisplay(rows: Row[]): Row[] {
+  return [...rows].sort((a, b) => {
+    const cr = coinRank(a.coin) - coinRank(b.coin);
+    if (cr !== 0) return cr;
+
+    const ir = a.index - b.index;
+    if (ir !== 0) return ir;
+
+    const pr = a.path.localeCompare(b.path);
+    if (pr !== 0) return pr;
+
+    return addrKindRank(a.address) - addrKindRank(b.address);
+  });
+}
+
+function buildDisplayLines(sortedRows: Row[]): DisplayLine[] {
+  const out: DisplayLine[] = [];
+  let last: Coin | null = null;
+  for (const r of sortedRows) {
+    if (last !== r.coin) {
+      out.push({ kind: "group", coin: r.coin });
+      last = r.coin;
+    }
+    out.push({ kind: "row", row: r });
+  }
+  return out;
+}
 
 const NETWORK_LTC: bitcoin.Network = {
   messagePrefix: "\x19Litecoin Signed Message:\n",
@@ -203,7 +246,22 @@ function render(rows: Row[], json: ExportJson) {
   const privColHeader = (document.querySelector("th.privcol") as HTMLTableCellElement | null);
   if (privColHeader) privColHeader.style.display = privVisible ? "" : "none";
 
-  for (const r of rows) {
+  const lines = buildDisplayLines(rows);
+  const colSpan = privVisible ? 6 : 5;
+
+  for (const line of lines) {
+    if (line.kind === "group") {
+      const tr = document.createElement("tr");
+      tr.className = "group-row";
+      const td = document.createElement("td");
+      td.colSpan = colSpan;
+      td.textContent = line.coin;
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      continue;
+    }
+
+    const r = line.row;
     const tr = document.createElement("tr");
     const cells: Array<{ v: string; mono?: boolean; hide?: boolean }> = [
       { v: r.coin },
@@ -348,6 +406,8 @@ function compute(): { rows: Row[]; json: ExportJson } {
     }
   }
 
+  const sortedRows = sortRowsForDisplay(rows);
+
   const json: ExportJson = {
     mode,
     createdAt: new Date().toISOString(),
@@ -355,10 +415,10 @@ function compute(): { rows: Row[]; json: ExportJson } {
     derivationPaths: { ...paths },
     mnemonic: jsonMnemonic,
     brainWallet: jsonBrain,
-    rows
+    rows: sortedRows
   };
 
-  return { rows, json };
+  return { rows: sortedRows, json };
 }
 
 async function copyTextToClipboard(text: string) {
