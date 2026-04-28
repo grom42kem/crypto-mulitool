@@ -20,3 +20,7 @@ Thumbs.db
 # misc
 *.tsbuildinfo
 
+# local debug bundles (not part of the site)
+dist/bundle.debug.js
+dist/bundle.debug.js.map
+
