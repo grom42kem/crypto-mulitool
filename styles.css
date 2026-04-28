@@ -1,0 +1,152 @@
+:root{
+  --bg: #0b1220;
+  --panel: rgba(255,255,255,0.055);
+  --panel2: rgba(255,255,255,0.075);
+  --text: rgba(255,255,255,0.90);
+  --muted: rgba(255,255,255,0.70);
+  --muted2: rgba(255,255,255,0.58);
+  --border: rgba(255,255,255,0.13);
+  --accent: #86efac;
+  --accent2:#93c5fd;
+  --danger:#fda4af;
+  --ok:#86efac;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--sans);
+  color:var(--text);
+  background:
+    radial-gradient(1200px 650px at 12% 8%, rgba(147,197,253,0.14), transparent 60%),
+    radial-gradient(1100px 720px at 88% 0%, rgba(253,164,175,0.10), transparent 55%),
+    radial-gradient(900px 650px at 55% 95%, rgba(134,239,172,0.10), transparent 62%),
+    var(--bg);
+}
+
+.container{max-width:1200px;margin:0 auto;padding:18px}
+
+.header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.title{font-size:22px;font-weight:800;letter-spacing:0.2px}
+.subtitle{margin-top:4px;color:var(--muted);font-size:13px;line-height:1.35}
+.header-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035));
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+  box-shadow: 0 18px 46px rgba(0,0,0,0.32);
+  margin:14px 0;
+}
+
+.tabs{display:flex;gap:10px;margin-bottom:10px}
+.tab{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.035);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:650;
+}
+.tab-active{
+  border-color: rgba(147,197,253,0.40);
+  background:rgba(147,197,253,0.09)
+}
+
+.pane{display:none}
+.pane-active{display:block}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width: 900px){.grid2{grid-template-columns:1fr}}
+
+.label{font-size:12px;color:var(--muted);margin:6px 0;display:block}
+.hint{color:var(--muted2);font-size:12px;line-height:1.35;margin-top:6px}
+.mono{font-family:var(--mono)}
+
+.input,.textarea,.select{
+  width:100%;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,0.22);
+  color:var(--text);
+  padding:10px 12px;
+  outline:none;
+}
+.textarea{resize:vertical;min-height:62px}
+.input:focus,.textarea:focus,.select:focus{
+  border-color: rgba(147,197,253,0.55);
+  box-shadow:0 0 0 3px rgba(147,197,253,0.12)
+}
+
+.row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.row > *{flex:1 1 220px}
+.row-end{flex:0 0 auto}
+
+.btn{
+  border-radius:12px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  cursor:pointer;
+  font-weight:700;
+}
+.btn-primary{
+  background: linear-gradient(135deg, rgba(147,197,253,0.24), rgba(134,239,172,0.18));
+  border-color: rgba(147,197,253,0.42);
+  color:var(--text);
+}
+.btn-secondary{
+  background: rgba(255,255,255,0.035);
+  color:var(--text);
+}
+.btn:active{transform: translateY(1px)}
+
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+.details summary{
+  cursor:pointer;
+  user-select:none;
+  color:var(--text);
+  font-weight:750;
+  margin:6px 0 10px;
+}
+
+.pathbox{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.028);
+  border-radius:14px;
+  padding:10px;
+}
+.coin{font-weight:900;letter-spacing:0.4px}
+
+.status{font-size:12px;color:var(--muted)}
+.status-ok{color:var(--ok)}
+.status-err{color:var(--danger)}
+
+.table-wrap{overflow:auto;border-radius:14px;border:1px solid var(--border);margin-top:10px}
+.table{width:100%;border-collapse:collapse;min-width:980px}
+.table th,.table td{
+  padding:10px 10px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  vertical-align:top;
+  font-size:12px;
+}
+.table th{position:sticky;top:0;background:rgba(15,23,42,0.95);backdrop-filter: blur(10px);text-align:left;color:rgba(255,255,255,0.78);font-weight:800}
+.table th{
+  position:sticky;
+  top:0;
+  background:rgba(14,20,34,0.92);
+  backdrop-filter: blur(10px);
+  text-align:left;
+  color:rgba(255,255,255,0.80);
+  font-weight:800
+}
+.table td{color:rgba(255,255,255,0.9)}
+.table td code{font-family:var(--mono);font-size:12px}
+
+.footer{color:var(--muted2);font-size:12px;padding-top:6px}
+

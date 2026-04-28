@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto Multitool</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="container header">
+      <div>
+        <div class="title">Crypto Multitool</div>
+        <div class="subtitle">Mnemonic (BIP39) / Brain Wallet → addresses and private keys (local, no CDN)</div>
+      </div>
+      <div class="header-actions">
+        <button id="btnClear" class="btn btn-secondary" type="button">Clear</button>
+        <button id="btnCopyJson" class="btn btn-secondary" type="button">Copy JSON</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="tabs">
+          <button id="tabMnemonic" class="tab tab-active" type="button">Mnemonic</button>
+          <button id="tabBrain" class="tab" type="button">Brain Wallet</button>
+        </div>
+
+        <div id="paneMnemonic" class="pane pane-active">
+          <div class="grid2">
+            <div>
+              <label class="label" for="mnemonic">Mnemonic phrase (BIP39)</label>
+              <textarea id="mnemonic" class="textarea" rows="3" placeholder="abandon abandon abandon ..."></textarea>
+              <div class="hint">Whitespace/newlines are allowed. Validated against the BIP39 English wordlist.</div>
+            </div>
+            <div>
+              <label class="label" for="passphrase">Passphrase (BIP39 passphrase, optional)</label>
+              <input id="passphrase" class="input" type="password" placeholder="(optional)" />
+              <div class="hint">This is the BIP39 passphrase (extra input), not a “25th word”.</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="paneBrain" class="pane">
+          <div class="grid2">
+            <div>
+              <label class="label" for="brainText">Any string for Brain Wallet</label>
+              <textarea id="brainText" class="textarea" rows="3" placeholder="any text / password / phrase"></textarea>
+              <div class="hint">Deterministic: SHA-256(string) → private key (secp256k1).</div>
+            </div>
+            <div>
+              <div class="row">
+                <label class="label" for="brainNormalize">Normalization</label>
+                <select id="brainNormalize" class="select">
+                  <option value="none">No changes</option>
+                  <option value="trim">Trim (strip edges)</option>
+                  <option value="trim-lower">Trim + lowercase</option>
+                </select>
+              </div>
+              <div class="hint">Optional: helps avoid “invisible” differences caused by spaces/casing.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <section class="controls">
+          <div class="row">
+            <div>
+              <label class="label" for="count">How many (indices 0..N-1)</label>
+              <input id="count" class="input" type="number" min="1" max="50" value="5" />
+            </div>
+            <div>
+              <label class="label" for="showPriv">Show private keys</label>
+              <select id="showPriv" class="select">
+                <option value="yes" selected>Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="autoUpdate">Auto-update</label>
+              <select id="autoUpdate" class="select">
+                <option value="on" selected>On</option>
+                <option value="off">Off</option>
+              </select>
+            </div>
+            <div class="row-end">
+              <button id="btnGenerate" class="btn btn-primary" type="button">Generate</button>
+            </div>
+          </div>
+        </section>
+
+        <details class="details">
+          <summary>Derivation paths (editable)</summary>
+          <div class="grid2">
+            <div class="pathbox">
+              <div class="coin">BTC</div>
+              <label class="label" for="path_btc">Path (BIP32)</label>
+              <input id="path_btc" class="input mono" value="m/44'/0'/0'/0/{index}" />
+              <div class="hint">Uses P2PKH. BTC shows both compressed and uncompressed.</div>
+            </div>
+            <div class="pathbox">
+              <div class="coin">ETH</div>
+              <label class="label" for="path_eth">Path</label>
+              <input id="path_eth" class="input mono" value="m/44'/60'/0'/0/{index}" />
+            </div>
+            <div class="pathbox">
+              <div class="coin">LTC</div>
+              <label class="label" for="path_ltc">Path</label>
+              <input id="path_ltc" class="input mono" value="m/44'/2'/0'/0/{index}" />
+              <div class="hint">P2PKH + compressed/uncompressed.</div>
+            </div>
+            <div class="pathbox">
+              <div class="coin">DOGE</div>
+              <label class="label" for="path_doge">Path</label>
+              <input id="path_doge" class="input mono" value="m/44'/3'/0'/0/{index}" />
+              <div class="hint">P2PKH + compressed/uncompressed.</div>
+            </div>
+            <div class="pathbox">
+              <div class="coin">XRP</div>
+              <label class="label" for="path_xrp">Path</label>
+              <input id="path_xrp" class="input mono" value="m/44'/144'/0'/0/{index}" />
+              <div class="hint">Classic address (r...). Private key is in ripple-keypairs format.</div>
+            </div>
+          </div>
+          <div class="hint">Template: <span class="mono">{index}</span> is replaced with 0..N-1. You can also hardcode an index directly in the path.</div>
+        </details>
+      </section>
+
+      <section class="card">
+        <div class="row">
+          <div>
+            <div class="label">Result</div>
+            <div id="status" class="status">Ready</div>
+          </div>
+          <div class="row-end">
+            <button id="btnCopyTable" class="btn btn-secondary" type="button">Copy table</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="resultTable">
+            <thead>
+              <tr>
+                <th>Coin</th>
+                <th>Index</th>
+                <th>Path</th>
+                <th>Address</th>
+                <th>Pubkey</th>
+                <th class="privcol">Private</th>
+              </tr>
+            </thead>
+            <tbody id="resultTbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <details class="details" open>
+          <summary>Export</summary>
+          <label class="label" for="jsonOut">JSON</label>
+          <textarea id="jsonOut" class="textarea mono" rows="10" readonly></textarea>
+        </details>
+      </section>
+    </main>
+
+    <footer class="container footer">
+      <div class="hint">
+        Important: don’t type real seeds on untrusted machines. This tool is offline-oriented, but security is your responsibility.
+      </div>
+    </footer>
+
+    <script type="module" src="./dist/bundle.js"></script>
+  </body>
+</html>
+
